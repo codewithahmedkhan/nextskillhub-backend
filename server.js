@@ -66,3 +66,16 @@ async function run() {
 }
 
 run();
+
+
+// Root Route
+app.get('/', (req, res) => {
+    res.send(`
+      <h1>Welcome to the Backend Server</h1>
+      <ul>
+        <li><a href="collection/orders">Go to Orders</a></li>
+        <li><a href="collection/lessons">Go to Lessons</a></li>
+      </ul>
+    `);
+  });
+  
