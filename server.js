@@ -60,10 +60,16 @@ async function run() {
       `);
     });
 
-    // Get all lessons
+    // Get all lessons with sorting and searching
     app.get('/collection/lessons', async (req, res) => {
+      const { sortBy = 'title', order = 'asc' } = req.query;
+      const sortOrder = order === 'asc' ? 1 : -1; // Determine ascending/descending order
+
       try {
-        const lessons = await lessonsCollection.find({}).toArray();
+        const lessons = await lessonsCollection
+          .find({})
+          .sort({ [sortBy]: sortOrder }) // Sort by the selected attribute
+          .toArray();
         res.json(lessons);
       } catch (error) {
         console.error('Error fetching lessons:', error);
@@ -71,24 +77,14 @@ async function run() {
       }
     });
 
-    // Get all orders
-app.get('/collection/orders', async (req, res) => {
-    try {
-      const orders = await ordersCollection.find({}).toArray();  // Fetch all orders from the database
-      res.json(orders);  // Send the orders back as JSON
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      res.status(500).json({ error: 'Failed to fetch orders' });  // Handle errors
-    }
-  });
-
-    // Search lessons
+    // Search lessons with sorting
     app.get('/search/lessons', async (req, res) => {
-      const query = req.query.q || '';
-      try {
-        const regex = new RegExp(query, 'i'); // case-insensitive search
+      const { q = '', sortBy = 'title', order = 'asc' } = req.query;
+      const regex = new RegExp(q, 'i'); // case-insensitive search
+      const sortOrder = order === 'asc' ? 1 : -1; // Determine ascending/descending order
 
-        const results = await lessonsCollection
+      try {
+        const lessons = await lessonsCollection
           .find({
             $or: [
               { title: regex },
@@ -98,12 +94,23 @@ app.get('/collection/orders', async (req, res) => {
               { description: regex },
             ],
           })
+          .sort({ [sortBy]: sortOrder }) // Sort by the selected attribute
           .toArray();
-
-        res.json(results);
+        res.json(lessons);
       } catch (error) {
-        console.error('Search error:', error);
-        res.status(500).json({ error: 'Search failed.' });
+        console.error('Error searching lessons:', error);
+        res.status(500).json({ error: 'Failed to search lessons' });
+      }
+    });
+
+    // Get all orders
+    app.get('/collection/orders', async (req, res) => {
+      try {
+        const orders = await ordersCollection.find({}).toArray();
+        res.json(orders);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ error: 'Failed to fetch orders' });
       }
     });
 
@@ -180,4 +187,3 @@ app.get('/collection/orders', async (req, res) => {
 }
 
 run().catch(console.dir);
-
