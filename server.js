@@ -103,3 +103,29 @@ app.get('/collection/orders', async (req, res) => {
     }
   });
   
+
+  // Search lessons
+app.get('/search/lessons', async (req, res) => {
+    const query = req.query.q || '';
+    try {
+      const regex = new RegExp(query, 'i'); // case-insensitive search
+  
+      const results = await lessonsCollection
+        .find({
+          $or: [
+            { title: regex },
+            { location: regex },
+            { price: { $regex: regex } },
+            { availableSeats: { $regex: regex } },
+            { description: regex },
+          ],
+        })
+        .toArray();
+  
+      res.json(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ error: 'Search failed.' });
+    }
+  });
+  
