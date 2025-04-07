@@ -129,3 +129,40 @@ app.get('/search/lessons', async (req, res) => {
     }
   });
   
+
+  // Post an order
+app.post('/collection/orders', async (req, res) => {
+    try {
+      const order = req.body;
+  
+      // Validate required fields
+      if (!order.fullName || !order.phoneNumber || !order.lessons || order.lessons.length === 0) {
+        return res.status(400).json({ error: 'Missing required fields.' });
+      }
+  
+      // Check for available seats in the lessons
+      for (const item of order.lessons) {
+        const lesson = await lessonsCollection.findOne({
+          _id: new ObjectId(item._id),
+        });
+        if (!lesson || lesson.availableSeats < item.quantity) {
+          return res.status(400).json({
+            error: `Not enough seats available in ${lesson?.title || 'lesson'}.`,
+          });
+        }
+  
+        // Decrease available seats
+        await lessonsCollection.updateOne(
+          { _id: new ObjectId(item._id) },
+          { $inc: { availableSeats: -item.quantity } }
+        );
+      }
+  
+      const result = await ordersCollection.insertOne(order);
+      res.status(201).json({ message: 'Order created successfully', orderId: result.insertedId });
+    } catch (error) {
+      console.error('Order error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
