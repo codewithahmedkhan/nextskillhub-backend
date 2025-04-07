@@ -40,3 +40,29 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+
+import { MongoClient } from 'mongodb';
+
+// MongoDB connection
+const uri = 'your-mongo-uri';
+const client = new MongoClient(uri);
+
+let lessonsCollection;
+let ordersCollection;
+
+// MongoDB Connection & Server Initialization
+async function run() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+    
+    const database = client.db('skillhub');
+    lessonsCollection = database.collection('lessons');
+    ordersCollection = database.collection('orders');
+  } catch (error) {
+    console.error('Failed to connect to MongoDB:', error);
+  }
+}
+
+run();
