@@ -91,3 +91,15 @@ app.get('/collection/lessons', async (req, res) => {
     }
   });
   
+
+  // Get all orders
+app.get('/collection/orders', async (req, res) => {
+    try {
+      const orders = await ordersCollection.find({}).toArray();  // Fetch all orders from the database
+      res.json(orders);  // Send the orders back as JSON
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ error: 'Failed to fetch orders' });  // Handle errors
+    }
+  });
+  
