@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/codewithahmedkhan/nextskillhub-backend#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.1.0",
     "install": "^0.13.0",
     "mongodb": "^6.15.0",

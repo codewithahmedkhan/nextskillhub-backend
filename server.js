@@ -2,6 +2,10 @@ import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors';
+
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
