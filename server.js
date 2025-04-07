@@ -116,44 +116,59 @@ async function run() {
 
     // Post an order
     app.post('/collection/orders', async (req, res) => {
-      try {
-        const order = req.body;
-
-        // Validate required fields
-        if (
-          !order.fullName ||
-          !order.phoneNumber ||
-          !order.lessons ||
-          order.lessons.length === 0
-        ) {
-          return res.status(400).json({ error: 'Missing required fields.' });
-        }
-
-        // Check for available seats in the lessons
-        for (const item of order.lessons) {
-          const lesson = await lessonsCollection.findOne({
-            _id: new ObjectId(item._id),
-          });
-          if (!lesson || lesson.availableSeats < item.quantity) {
-            return res.status(400).json({
-              error: `Not enough seats available in ${lesson?.title || 'lesson'}.`,
-            });
+        try {
+          const order = req.body;
+      
+          // Validate required fields
+          if (
+            !order.fullName ||
+            !order.phoneNumber ||
+            !order.items || // Changed from lessons to items
+            order.items.length === 0
+          ) {
+            return res.status(400).json({ error: 'Missing required fields.' });
           }
-
-          // Decrease available seats
-          await lessonsCollection.updateOne(
-            { _id: new ObjectId(item._id) },
-            { $inc: { availableSeats: -item.quantity } }
-          );
+      
+          // Check for available seats in the lessons
+          for (const item of order.items) { // Changed from lessons to items
+            const lesson = await lessonsCollection.findOne({
+              _id: new ObjectId(item.product._id), // Adjusted to match frontend structure
+            });
+            if (!lesson || lesson.availableSeats < item.quantity) {
+              return res.status(400).json({
+                error: `Not enough seats available in ${lesson?.title || 'lesson'}.`,
+              });
+            }
+      
+            // Decrease available seats
+            await lessonsCollection.updateOne(
+              { _id: new ObjectId(item.product._id) }, // Adjusted to match frontend structure
+              { $inc: { availableSeats: -item.quantity } }
+            );
+          }
+      
+          // Transform the order data to match your desired schema
+          const orderToInsert = {
+            fullName: order.fullName,
+            phoneNumber: order.phoneNumber,
+            lessons: order.items.map(item => ({
+              lessonId: new ObjectId(item.product._id),
+              title: item.product.title,
+              quantity: item.quantity,
+              price: item.product.price
+            })),
+            orderDate: new Date()
+          };
+      
+          const result = await ordersCollection.insertOne(orderToInsert);
+          res.status(201).json({ message: 'Order created successfully', orderId: result.insertedId });
+        } catch (error) {
+          console.error('Order error:', error);
+          res.status(500).json({ error: 'Internal server error' });
         }
+      });
 
-        const result = await ordersCollection.insertOne(order);
-        res.status(201).json({ message: 'Order created successfully', orderId: result.insertedId });
-      } catch (error) {
-        console.error('Order error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
+      
 
     // Update lesson (for example, after an order is placed, update available seats)
     app.put('/collection/lessons/:id', async (req, res) => {
