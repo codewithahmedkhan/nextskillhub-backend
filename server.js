@@ -4,18 +4,26 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 
+
+
+
 const app = express();
+
 const port = process.env.PORT || 3000;
 
 // Middleware to handle JSON request body
 app.use(express.json());
 
-// Use cors middleware for cross-origin requests
-app.use(cors({
-  origin: '*', // Allow all origins (this can be restricted to a specific origin in production)
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow necessary methods
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'], // Allow specific headers
-}));
+// CORS Middleware for cross-origin requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Logging Middleware
 app.use((req, res, next) => {
