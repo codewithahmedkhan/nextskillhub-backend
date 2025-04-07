@@ -1,8 +1,8 @@
 {
   "name": "nextskillhub-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Next SKill Hub Website for students to learn and grow ( FULL STACK CW PROJECT )",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
