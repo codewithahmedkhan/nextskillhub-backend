@@ -79,3 +79,15 @@ app.get('/', (req, res) => {
     `);
   });
   
+
+  // Get all lessons
+app.get('/collection/lessons', async (req, res) => {
+    try {
+      const lessons = await lessonsCollection.find({}).toArray();
+      res.json(lessons);
+    } catch (error) {
+      console.error('Error fetching lessons:', error);
+      res.status(500).json({ error: 'Failed to fetch lessons' });
+    }
+  });
+  
