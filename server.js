@@ -166,3 +166,26 @@ app.post('/collection/orders', async (req, res) => {
     }
   });
   
+
+  // Update lesson (for example, after an order is placed, update available seats)
+app.put('/collection/lessons/:id', async (req, res) => {
+    try {
+      const lessonId = req.params.id;
+      const updateData = req.body;
+  
+      const result = await lessonsCollection.updateOne(
+        { _id: new ObjectId(lessonId) },
+        { $set: updateData }
+      );
+  
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ error: 'Lesson not found' });
+      }
+  
+      res.json({ message: 'Lesson updated successfully' });
+    } catch (error) {
+      console.error('Error updating lesson:', error);
+      res.status(500).json({ error: 'Failed to update lesson' });
+    }
+  });
+  
